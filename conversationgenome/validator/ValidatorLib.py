@@ -29,7 +29,6 @@ if c.get('env', 'FORCE_LOG') == 'debug':
 elif c.get('env', 'FORCE_LOG') == 'info':
     bt.logging.enable_default(True)
 
-import wandb
 
 # xxx Refactor to multiple participants. Make abstract class?
 proto = {
