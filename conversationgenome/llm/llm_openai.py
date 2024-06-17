@@ -395,7 +395,7 @@ class llm_openai:
 
     async def get_vector_embeddings(self, text):
         embedding = None
-        text =  text.replace("\n"," ")
+        text = text.replace("\n"," ")
         if not self.direct_call:
            response = client.embeddings.create(
                model=self.embeddings_model,

@@ -100,6 +100,48 @@ class ValidatorLib:
             bt.logging.error(f"ERROR:9879432: No conversation returned from API. Aborting.")
         return None
 
+    async def reserve_conversation_v1(self, minConvWindows = 1, batch_num=None):
+        out = None
+
+        full_conversation = await self.getConvo()
+        if self.verbose:
+            bt.logging.info("full_conversation", full_conversation)
+
+        if full_conversation:
+            conversation_guid = str(Utils.get(full_conversation, "guid"))
+            num_lines = len(Utils.get(full_conversation, 'lines', []))
+
+            bt.logging.info(f"Reserved conversation ID: {conversation_guid} with {num_lines} lines. Sending to {c.get('env','LLM_TYPE')} LLM...")
+
+            # Do overview tagging and generate base participant profiles
+            full_conversation_metadata = await self.generate_full_convo_metadata_v1(full_conversation)
+
+            full_conversation_tags = Utils.get(full_conversation_metadata, "tags", [])
+            bt.logging.info(f"Found {len(full_conversation_tags)} tags in FullConvo")
+
+            log_path = c.get('env', 'SCORING_DEBUG_LOG')
+            if not Utils.empty(log_path):
+                Utils.append_log(log_path, f"Validator found full convo tags {full_conversation_tags} in FullConvo")
+
+            # Make sure there are enough tags to make processing worthwhile
+            minValidTags = self.validateMinimumTags(full_conversation_tags)
+            if minValidTags:
+                # Break the full conversation up into overlapping conversation windows
+                convoWindows = self.getConvoWindows(full_conversation)
+                if len(convoWindows) > minConvWindows:
+                    out = (full_conversation, full_conversation_metadata, convoWindows)
+                else:
+                    bt.logging.info(f"Not enough convo windows -- only {len(convoWindows)}. Passing.")
+                    out = None
+            else:
+                bt.logging.info("Not enough valid tags for conversation. Passing.")
+                out = None
+
+            return out
+        else:
+            bt.logging.error(f"ERROR:9879432: No conversation returned from API. Aborting.")
+        return None
+
     async def getConvo(self):
         hotkey = self.hotkey
         cl = ConvoLib()
@@ -147,6 +189,29 @@ class ValidatorLib:
             "participantProfiles": convo['participants'],
             "tags": tags,
             "vectors": vectors,
+        }
+        return data
+
+    async def generate_full_convo_metadata_v1(self, convo):
+        if self.verbose:
+            bt.logging.info(f"Execute generate_full_convo_metadata for participants {convo['participants']}")
+        else:
+            bt.logging.info(f"Execute generate_full_convo_metadata")
+
+        llml = LlmLib()
+        result = await llml.conversation_to_metadata(convo)
+        if not result:
+            bt.logging.error(f"ERROR:2873226353. No conversation metadata returned. Aborting.")
+            return None
+        if not Utils.get(result, 'success'):
+            bt.logging.error(f"ERROR:2873226354. Conversation metadata failed: {result}. Aborting.")
+            return None
+
+        tags = result['tags']
+        vectors = Utils.get(result, 'vectors', {})
+        data = {
+            "participantProfiles": convo['participants'],
+            "tags": tags
         }
         return data
 
