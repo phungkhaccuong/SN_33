@@ -120,7 +120,7 @@ class llm_openai:
         (xml, participants) = self.generate_convo_xml(convo)
         tags = None
         out = {"tags":{}}
-
+        print(f"XML:::::{xml}")
         response = await self.call_llm_tag_function(convoXmlStr=xml, participants=participants)
         if not response:
             print("No tagging response. Aborting")
