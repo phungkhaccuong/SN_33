@@ -53,4 +53,6 @@ async def test_full():
     print(f"//////////////////////////////////////////////////////////////////////////////////////////")
     print(f"full_conversation_metadata:::::{full_conversation_metadata}")
     print(f"//////////////////////////////////////////////////////////////////////////////////////////")
-    print(f"conversation_windows:::::{conversation_windows}")
+    for window_idx, conversation_window in enumerate(conversation_windows):
+        print(f"window_idx::: {window_idx}")
+        print(f"conversation_windows:::::{conversation_windows}")
