@@ -40,7 +40,6 @@ async def test_full():
     wandb_enabled = Utils._int(c.get('env', 'WAND_ENABLED'), 1)
     if wandb_enabled:
         wl = WandbLib()
-        wl.init_wandb()
     # Config variables
     c.set('system', 'mode', 'test')
 
