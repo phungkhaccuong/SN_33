@@ -292,6 +292,8 @@ class llm_openai:
             completion = self.do_direct_call(data)
             #print("________CSV LLM completion", completion)
             out = completion['json']['choices'][0]['message']['content']
+            print(f"====================================================================OUT====================================================================")
+            print(f"OUT:{out}")
         return out
 
 
