@@ -121,6 +121,51 @@ class llm_openai:
         tags = None
         out = {"tags":{}}
         print(f"XML:::::{xml}")
+        response = await self.call_llm_tag_function_v1(convoXmlStr=xml, participants=participants)
+        print(f"response:{response}")
+        if not response:
+            print("No tagging response. Aborting")
+            return None
+        elif not response['success']:
+            print(f"Tagging failed: {response}. Aborting")
+            return response
+
+        if self.return_json:
+            tags = self.process_json_tag_return(response)
+        else:
+            content = Utils.get(response, 'content')
+            if content:
+                tags = content.split(",")
+            else:
+                tags = ""
+            tags = Utils.clean_tags(tags)
+
+        if not Utils.empty(tags):
+            if self.verbose:
+                print(f"------- Found tags: {tags}. Getting vectors for tags...")
+            out['tags'] = tags
+            out['vectors'] = {}
+            tag_logs = []
+            for tag in tags:
+                vectors = await self.get_vector_embeddings(tag)
+                if not vectors:
+                    print(f"ERROR -- no vectors for tag: {tag} vector response: {vectors}")
+                else:
+                    tag_logs.append(f"{tag}={len(vectors)}vs")
+                out['vectors'][tag] = {"vectors":vectors}
+            if self.verbose:
+                print("        Embeddings received: " + ", ".join(tag_logs))
+                print("VECTORS", tag, vectors)
+            out['success'] = 1
+        else:
+            print("No tags returned by OpenAI", response)
+        return out
+
+    async def conversation_to_metadata_v1(self,  convo):
+        (xml, participants) = self.generate_convo_xml(convo)
+        tags = None
+        out = {"tags":{}}
+        print(f"XML:::::{xml}")
         response = await self.call_llm_tag_function(convoXmlStr=xml, participants=participants)
         print(f"response:{response}")
         if not response:
@@ -332,6 +377,40 @@ class llm_openai:
                 print(f"________CSV LLM completion completion:{completion} out:{out}")
         return out
 
+
+    async def openai_prompt_call_csv_v1(self, convoXmlStr=None, participants=None):
+        direct_call = Utils._int(c.get('env', "OPENAI_DIRECT_CALL"))
+        prompt1 = 'Analyze the conversation in terms of topic interests of the participants. Analyze the conversation (provided in structured XML format) where <p0> has the questions and <p1> has the answers. Return at least 5 tags (the tags can be synonymous) separated by commas. Only return the tags without any English commentary'
+        prompt = prompt1 + "\n\n\n"
+        if convoXmlStr:
+            prompt += convoXmlStr
+        else:
+            prompt += self.getExampleFunctionConv()
+
+        if not direct_call:
+            client = AsyncOpenAI()
+            completion = await client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt} ],
+            )
+            out = completion.choices[0].message
+        else:
+            data = {
+              "model": self.model,
+              "messages": [{"role": "user", "content": prompt}],
+            }
+            completion = self.do_direct_call(data)
+            errors = Utils.get(completion, "errors", [])
+            if Utils.get(completion, "success"):
+                out = completion
+                out['content'] = Utils.get(completion, "json.choices.0.message.content")
+            else:
+                out = completion
+                out['content'] = None
+            if self.verbose:
+                print(f"________CSV LLM completion completion:{completion} out:{out}")
+        return out
+
     async def openai_prompt_call_function(self, convoXmlStr=None, participants=None):
         # Worked with 2023 API, problems with 2024 API. Debug.
         completion = await client.chat.completions.create(
@@ -386,6 +465,33 @@ class llm_openai:
         else:
             print("HERE3")
             out = await self.openai_prompt_call_csv(convoXmlStr=convoXmlStr, participants=participants)
+
+        return out
+
+    async def call_llm_tag_function_v1(self, convoXmlStr=None, participants=None, call_type="csv"):
+        out = {}
+        direct_call = c.get('env', "OPENAI_DIRECT_CALL")
+        if not OpenAI and not direct_call:
+            print("OpenAI not installed")
+            return
+
+        if self.verbose:
+            print("Calling OpenAi...")
+
+        if not self.direct_call and not OpenAI.api_key:
+            print("No OpenAI key")
+            return
+
+        call_type = c.get('enc', "OPEN_AI_CALL_TYPE", 'csv')
+        if call_type == "function":
+            print("HERE11")
+            out = await self.openai_prompt_call_function(convoXmlStr=convoXmlStr, participants=participants)
+        elif call_type == "json":
+            print("HERE12")
+            out = await self.openai_prompt_call_json(convoXmlStr=convoXmlStr, participants=participants)
+        else:
+            print("HERE13")
+            out = await self.openai_prompt_call_csv_v1(convoXmlStr=convoXmlStr, participants=participants)
 
         return out
 

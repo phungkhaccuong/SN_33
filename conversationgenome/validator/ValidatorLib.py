@@ -224,6 +224,16 @@ class ValidatorLib:
             results.append(task.result())
         return results
 
+    async def send_to_miners_v1(self, conversation_guid, window_idx, conversation_window, miner_uids):
+        bt.logging.info(f"Send to conversation {conversation_guid} / {window_idx} to miners: {miner_uids}")
+        results = []
+        ml = MinerLib()
+        tasks = [asyncio.create_task(ml.do_mining_v1(conversation_guid, window_idx, conversation_window, minerUid)) for minerUid in miner_uids]
+        await asyncio.wait(tasks)
+        for task in tasks:
+            results.append(task.result())
+        return results
+
     def validateMinimumTags(self, tags):
         # TODO: Validate tags
         #bt.logging.info("Validating tags", tags)

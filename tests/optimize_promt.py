@@ -53,6 +53,19 @@ async def test_full():
     print(f"//////////////////////////////////////////////////////////////////////////////////////////")
     print(f"full_conversation_metadata:::::{full_conversation_metadata}")
     print(f"//////////////////////////////////////////////////////////////////////////////////////////")
+    selected_miner_uids = [1]
     for window_idx, conversation_window in enumerate(conversation_windows):
-        print(f"=======================================window_idx:::{window_idx}==========================================")
-        print(f"conversation_windows:::::{conversation_window}")
+        bt.logging.info(f"conversation_window:::{conversation_window}")
+
+        bt.logging.debug(f"Sending conversation_window {window_idx} to selected miners: {selected_miner_uids}")
+
+        miner_results = await vl.send_to_miners_v1("123", window_idx, conversation_window, selected_miner_uids)
+        mock_miner_responses = []
+        for idx, miner_result in enumerate(miner_results):
+            bt.logging.info(f"RESULTS from miner idx: {idx} uid: {miner_result['uid']}, tags: {miner_result['tags']}")
+
+    # for window_idx, conversation_window in enumerate(conversation_windows):
+    #     print(f"=======================================window_idx:::{window_idx}==========================================")
+    #     print(f"conversation_windows:::::{conversation_window}")
+
+
