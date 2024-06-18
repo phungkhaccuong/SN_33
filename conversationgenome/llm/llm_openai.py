@@ -122,6 +122,7 @@ class llm_openai:
         out = {"tags":{}}
         print(f"XML:::::{xml}")
         response = await self.call_llm_tag_function(convoXmlStr=xml, participants=participants)
+        print(f"response:{response}")
         if not response:
             print("No tagging response. Aborting")
             return None
@@ -273,6 +274,7 @@ class llm_openai:
         else:
             prompt += self.getExampleFunctionConv()
 
+        print(f"HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
         if not direct_call:
             client = AsyncOpenAI()
             completion = await client.chat.completions.create(
