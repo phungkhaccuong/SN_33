@@ -31,7 +31,6 @@ class c:
 
     @staticmethod
     def get(section, key, default=None, return_type=None):
-        get('enc', "OPEN_AI_CALL_TYPE", 'csv')
         out = default
         if section == "env":
             #print("env", os.environ.get(key))

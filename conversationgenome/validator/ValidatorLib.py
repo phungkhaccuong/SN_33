@@ -24,10 +24,6 @@ except:
         print("bittensor not installed")
     bt = MockBt()
 
-if c.get('env', 'FORCE_LOG') == 'debug':
-    bt.logging.enable_debug(True)
-elif c.get('env', 'FORCE_LOG') == 'info':
-    bt.logging.enable_default(True)
 
 
 # xxx Refactor to multiple participants. Make abstract class?
