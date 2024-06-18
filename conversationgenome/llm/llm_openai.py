@@ -378,10 +378,13 @@ class llm_openai:
 
         call_type = c.get('enc', "OPEN_AI_CALL_TYPE", 'csv')
         if call_type == "function":
+            print("HERE1")
             out = await self.openai_prompt_call_function(convoXmlStr=convoXmlStr, participants=participants)
         elif call_type == "json":
+            print("HERE2")
             out = await self.openai_prompt_call_json(convoXmlStr=convoXmlStr, participants=participants)
         else:
+            print("HERE3")
             out = await self.openai_prompt_call_csv(convoXmlStr=convoXmlStr, participants=participants)
 
         return out
