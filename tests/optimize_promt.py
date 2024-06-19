@@ -55,7 +55,7 @@ async def test_full():
     print(f"//////////////////////////////////////////////////////////////////////////////////////////")
     selected_miner_uids = [1]
     for window_idx, conversation_window in enumerate(conversation_windows):
-        bt.logging.info(f"conversation_window:::{conversation_window}")
+        #bt.logging.info(f"conversation_window:::{conversation_window}")
 
         bt.logging.debug(f"Sending conversation_window {window_idx} to selected miners: {selected_miner_uids}")
 
