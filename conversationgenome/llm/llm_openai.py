@@ -166,7 +166,7 @@ class llm_openai:
         tags = None
         out = {"tags":{}}
         print(f"XML:::::{xml}")
-        response = await self.call_llm_tag_function(convoXmlStr=xml, participants=participants)
+        response = await self.call_llm_tag_function_v1(convoXmlStr=xml, participants=participants)
         #print(f"response:{response}")
         if not response:
             print("No tagging response. Aborting")
@@ -380,7 +380,7 @@ class llm_openai:
 
     async def openai_prompt_call_csv_v1(self, convoXmlStr=None, participants=None):
         direct_call = Utils._int(c.get('env', "OPENAI_DIRECT_CALL"))
-        prompt1 = 'Analyze the conversation (provided in structured XML format) where <p0> has the questions and <p1> has the answers. The conversation provided to you is extracted from a longer conversation on YouTube, podcasts, etc. Your task is to understand the context and analyze the interests, age, topics, etc., that the participants are discussing. Return the tags (the number of tags >= 5 and the tags can be synonymous but not identical) separated by commas. Only return the tags without any English commentary.'
+        prompt1 = 'Analyze the conversation provided in structured XML format. The conversation provided to you is extracted from a longer conversation on YouTube, podcasts, etc. Your task is to understand the context and analyze the interests, age, topics, etc., that the participants are discussing. Return more than 4 tags (the tags can be synonymous) separated by commas. Only return the tags without any English commentary'
         prompt = prompt1 + "\n\n\n"
         if convoXmlStr:
             prompt += convoXmlStr
@@ -483,6 +483,7 @@ class llm_openai:
             print("No OpenAI key")
             return
 
+        print("HEREEEEE")
         out = await self.openai_prompt_call_csv_v1(convoXmlStr=convoXmlStr, participants=participants)
 
         return out
