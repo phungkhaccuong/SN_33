@@ -121,7 +121,7 @@ class llm_openai:
         tags = None
         out = {"tags":{}}
         print(f"XML:::::{xml}")
-        response = await self.call_llm_tag_function_v1(convoXmlStr=xml, participants=participants)
+        response = await self.call_llm_tag_function(convoXmlStr=xml, participants=participants)
         print(f"response:{response}")
         if not response:
             print("No tagging response. Aborting")
