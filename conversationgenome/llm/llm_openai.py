@@ -380,7 +380,7 @@ class llm_openai:
 
     async def openai_prompt_call_csv_v1(self, convoXmlStr=None, participants=None):
         direct_call = Utils._int(c.get('env', "OPENAI_DIRECT_CALL"))
-        prompt1 = 'Analyze the conversation provided in structured XML format. The conversation provided to you is extracted from a longer conversation on YouTube, podcasts, etc. Your task is to understand the context and analyze the interests, age, topics, etc., that the participants are discussing. Return more than 5 tags (the tags can be synonymous) separated by commas. Only return the tags without any English commentary'
+        prompt1 = 'Analyze conversation provided in structured XML format. The conversation provided to you is extracted from a longer conversation on YouTube, podcasts, etc. Your task is to understand the context and analyze the topic interests, hobbies, topics, etc., that the participants are discussing. Return more than 5 tags (the tags can be synonymous) separated by commas. Only return the tags without any English commentary'
         prompt = prompt1 + "\n\n\n"
         if convoXmlStr:
             prompt += convoXmlStr
