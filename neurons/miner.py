@@ -69,6 +69,8 @@ class Miner(BaseMinerNeuron):
         ml = MinerLib()
         result = await ml.do_mining(conversation_guid, window_idx, lines, 17)
 
+        bt.logging.info(f"Mined tags:{result['tags']}")
+
         if not Utils.empty(log_path):
             Utils.append_log(log_path, f"Mined vectors and tags: {result['tags']}")
 

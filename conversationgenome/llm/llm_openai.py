@@ -3,6 +3,7 @@ import json
 
 from conversationgenome.utils.Utils import Utils
 from conversationgenome.ConfigLib import c
+import bittensor as bt
 
 
 openai = None
@@ -297,7 +298,7 @@ class llm_openai:
 
     async def openai_prompt_call_csv(self, convoXmlStr=None, participants=None):
         direct_call = Utils._int(c.get('env', "OPENAI_DIRECT_CALL"))
-        prompt1 = 'Analyze conversation in terms of topic interests of the participants. Analyze the conversation (provided in structured XML format) where <p0> has the questions and <p1> has the answers . Return comma-delimited tags.  Only return the tags without any English commentary.'
+        prompt1 = 'Analyze conversation in terms of topic interests of the participants. Analyze the conversation (provided in structured XML format) where <p0> has the questions and <p1> has the answers . Return more than 5 tags (the tags can be synonymous) separated by commas.  Only return the tags without any English commentary.'
         prompt = prompt1 + "\n\n\n"
         if convoXmlStr:
             prompt += convoXmlStr
@@ -378,6 +379,7 @@ class llm_openai:
         elif call_type == "json":
             out = await self.openai_prompt_call_json(convoXmlStr=convoXmlStr, participants=participants)
         else:
+            bt.logging.error("openai_prompt_call_csv")
             out = await self.openai_prompt_call_csv(convoXmlStr=convoXmlStr, participants=participants)
 
         return out
