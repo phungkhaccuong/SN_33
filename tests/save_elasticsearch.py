@@ -58,7 +58,8 @@ data = [
          [0,
           'He both acknowledges the incredible challenges involved in solving the problem of autonomous driving and is working hard to solve it.'],
          [0, 'This is the Artificial Intelligence Podcast.']
-     ]
+     ],
+     'tags': None
      }
 ]
 
