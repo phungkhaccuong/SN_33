@@ -1,6 +1,14 @@
+import time
+
 from elasticsearch.helpers import bulk
 
+from conversationgenome.ConfigLib import c
+from conversationgenome.conversation.ConvoLib import ConvoLib
+from conversationgenome.llm.LlmLib import LlmLib
 from conversationgenome.search.structured_search_engine import StructuredSearchEngine
+from conversationgenome.utils.Utils import Utils
+import bittensor as bt
+import asyncio
 
 index_name = "conversations"
 
@@ -64,6 +72,7 @@ data = [
 ]
 
 
+
 def del_index(es):
     if es.indices.exists(index=index_name):
         # Delete the index
@@ -73,21 +82,58 @@ def del_index(es):
         print(f"Index '{index_name}' does not exist.")
 
 
+async def getConvo():
+    cl = ConvoLib()
+    convo = await cl.get_conversation_v1(None)
+    return convo
+
+
+async def reserve_conversation(elastic):
+    full_conversation = await getConvo()
+    if full_conversation:
+        conversation_guid = str(Utils.get(full_conversation, "guid"))
+        num_lines = len(Utils.get(full_conversation, 'lines', []))
+        bt.logging.info(
+            f"Reserved conversation ID: {conversation_guid} with {num_lines} lines. Sending to {c.get('env', 'LLM_TYPE')} LLM...")
+
+    # Do overview tagging and generate base participant profiles
+    llml = LlmLib()
+    result = await llml.conversation_to_metadata_v1(full_conversation)
+    print(f"result:{result}")
+    if not result:
+        bt.logging.error(f"ERROR:2873226353. No conversation metadata returned. Aborting.")
+        return None
+    if not Utils.get(result, 'success'):
+        bt.logging.error(f"ERROR:2873226354. Conversation metadata failed: {result}. Aborting.")
+        return None
+
+    full_conversation['tags'] = result['tags']
+    print(full_conversation)
+
+    #index_data_if_not_exists(elastic.es, data[0])
+
+
+
+
+
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
     # Index the data
-    index_data_if_not_exists(elastic.es, data[0])
-
-    # Define a search query for text field mapping
-    query = {
-        "query": {
-            "match": {
-                "lines": "Intelligence Podcast"
-            }
-        }
-    }
-
-    # Perform the search
-    response = elastic.es.search(index=index_name, body=query)
-    print(f"RESPONSE:{response}")
-    # Check if the index exists
+    while True:
+        asyncio.run(reserve_conversation(elastic))
+        time.sleep(10)
+    # index_data_if_not_exists(elastic.es, data[0])
+    #
+    # # Define a search query for text field mapping
+    # query = {
+    #     "query": {
+    #         "match": {
+    #             "lines": "Intelligence Podcast"
+    #         }
+    #     }
+    # }
+    #
+    # # Perform the search
+    # response = elastic.es.search(index=index_name, body=query)
+    # print(f"RESPONSE:{response}")
+    # # Check if the index exists

@@ -57,6 +57,16 @@ class LlmLib:
         response = await self.factory_llm.conversation_to_metadata(conversation)
         return response
 
+    async def conversation_to_metadata_v1(self,  conversation):
+        if not self.factory_llm:
+            self.factory_llm = await self.generate_llm_instance()
+            if not self.factory_llm:
+                bt.logging.error("LLM not found. Aborting conversation_to_metadata.")
+                return
+
+        response = await self.factory_llm.conversation_to_metadata_v1(conversation)
+        return response
+
 
 
 if __name__ == "__main__":

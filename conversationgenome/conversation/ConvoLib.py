@@ -12,6 +12,13 @@ class ConvoLib:
         convo = await api.reserveConversation(hotkey)
         return convo
 
+    async def get_conversation_v1(self, hotkey):
+        api = ApiLib()
+        convo = await api.reserveConversation_v1(hotkey)
+        print("===========================================================================================")
+        print(f"CONVO:{convo}")
+        return convo
+
     async def put_conversation(self, hotkey, c_guid, data, type="validator", batch_num=None, window=None):
         llm_model = c.get('env', c.get('env', 'LLM_TYPE').upper() + "_MODEL")
         output = {

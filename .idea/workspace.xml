@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="724f9003-2d56-4e26-9e1f-aa137c5b910b" name="Changes" comment="" />
+    <list default="true" id="724f9003-2d56-4e26-9e1f-aa137c5b910b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conversationgenome/api/ApiLib.py" beforeDir="false" afterPath="$PROJECT_DIR$/conversationgenome/api/ApiLib.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conversationgenome/conversation/ConvoLib.py" beforeDir="false" afterPath="$PROJECT_DIR$/conversationgenome/conversation/ConvoLib.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conversationgenome/llm/LlmLib.py" beforeDir="false" afterPath="$PROJECT_DIR$/conversationgenome/llm/LlmLib.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conversationgenome/llm/llm_openai.py" beforeDir="false" afterPath="$PROJECT_DIR$/conversationgenome/llm/llm_openai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/save_elasticsearch.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/save_elasticsearch.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
