@@ -123,21 +123,20 @@ async def reserve_conversation(elastic):
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
     # Index the data
-    while True:
-        asyncio.run(reserve_conversation(elastic))
-        time.sleep(10)
-    # index_data_if_not_exists(elastic.es, data[0])
-    #
-    # # Define a search query for text field mapping
-    # query = {
-    #     "query": {
-    #         "match": {
-    #             "lines": "Intelligence Podcast"
-    #         }
-    #     }
-    # }
-    #
-    # # Perform the search
-    # response = elastic.es.search(index=index_name, body=query)
-    # print(f"RESPONSE:{response}")
+    # while True:
+    #     asyncio.run(reserve_conversation(elastic))
+    #     time.sleep(10)
+
+    # Define a search query for text field mapping
+    query = {
+        "query": {
+            "match": {
+                "lines": "[1, 'And welcome back.']"
+            }
+        }
+    }
+
+    # Perform the search
+    response = elastic.es.search(index=index_name, body=query)
+    print(f"RESPONSE:{response}")
     # # Check if the index exists
