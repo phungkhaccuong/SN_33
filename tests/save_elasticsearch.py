@@ -48,28 +48,24 @@ data = [
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
     # Index the data
-    bulk(elastic.es, prepare_text_data(data))
-
-    # Define a search query for text field mapping
-    query = {
-        "query": {
-            "match": {
-                "lines": "there we it was kind of this dichotomy of"
-            }
-        }
-    }
-
-    # Perform the search
-    response = elastic.es.search(index=index_name, body=query)
-
-    # response = elastic.es.search(
-    #     index=index_name,
-    #     body={
-    #         "query": {
-    #             "match_all": {}
+    # bulk(elastic.es, prepare_text_data(data))
+    #
+    # # Define a search query for text field mapping
+    # query = {
+    #     "query": {
+    #         "match": {
+    #             "lines": "there we it was kind of this dichotomy of"
     #         }
-    #     },
-    #     scroll='2m',  # keep the search context alive for 2 minutes
-    #     size=1000  # number of documents to return in each batch
-    # )
-    print(f"RESPONSE:{response}")
+    #     }
+    # }
+    #
+    # # Perform the search
+    # response = elastic.es.search(index=index_name, body=query)
+    # print(f"RESPONSE:{response}")
+    # Check if the index exists
+    if elastic.es.indices.exists(index=index_name):
+        # Delete the index
+        elastic.es.indices.delete(index=index_name)
+        print(f"Index '{index_name}' deleted successfully.")
+    else:
+        print(f"Index '{index_name}' does not exist.")

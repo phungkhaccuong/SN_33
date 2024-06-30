@@ -22,7 +22,8 @@ class StructuredSearchEngine:
                         "properties": {
                             "guid": {"type": "text"},
                             "participants": {"type": "keyword"},
-                            "lines": {"type": "text"}
+                            "lines": {"type": "text"},
+                            "tags": {"type": "text"}
                         }
                     }
                 }
