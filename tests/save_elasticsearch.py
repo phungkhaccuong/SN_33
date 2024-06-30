@@ -85,6 +85,8 @@ def del_index(es):
 async def getConvo():
     cl = ConvoLib()
     convo = await cl.get_conversation_v1(None)
+    print(f"=================================================================START =============================================================")
+    print(f"convo.line:{convo.get('lines')}")
     return convo
 
 
@@ -108,7 +110,9 @@ async def reserve_conversation(elastic):
         return None
 
     full_conversation['tags'] = result['tags']
-    print(full_conversation)
+    print(
+        f"=================================================================START1111111 =============================================================")
+    print(f"convo.line:{full_conversation.get('tags')}")
 
     #index_data_if_not_exists(elastic.es, data[0])
 

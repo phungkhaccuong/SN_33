@@ -15,8 +15,6 @@ class ConvoLib:
     async def get_conversation_v1(self, hotkey):
         api = ApiLib()
         convo = await api.reserveConversation_v1(hotkey)
-        print("===========================================================================================")
-        print(f"CONVO:{convo}")
         return convo
 
     async def put_conversation(self, hotkey, c_guid, data, type="validator", batch_num=None, window=None):

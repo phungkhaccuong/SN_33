@@ -104,7 +104,6 @@ class ApiLib:
             "full_lines": Utils.get(selectedConvo, "lines", []),
             "lines": Utils.get(selectedConvo, "lines", [])[0:maxLines],
         }
-
         return convo
 
 
