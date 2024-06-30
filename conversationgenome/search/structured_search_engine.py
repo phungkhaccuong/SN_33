@@ -6,7 +6,8 @@ from elasticsearch import Elasticsearch
 
 class StructuredSearchEngine:
     def __init__(self):
-        self.es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        self.es = Elasticsearch([{'host': 'localhost', 'port': 9200, 'scheme': 'http'}])
+
         self.init_indices()
 
     def init_indices(self):
