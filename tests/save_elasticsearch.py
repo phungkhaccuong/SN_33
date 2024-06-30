@@ -76,7 +76,7 @@ def del_index(es):
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
     # Index the data
-    index_data_if_not_exists(data)
+    index_data_if_not_exists(elastic.es, data)
 
     # Define a search query for text field mapping
     query = {
