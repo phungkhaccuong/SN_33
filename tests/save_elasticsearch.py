@@ -51,15 +51,25 @@ if __name__ == '__main__':
     bulk(elastic.es, prepare_text_data(data))
 
     # Define a search query for text field mapping
-    query = {
-        "query": {
-            "match": {
-                "lines": "[0, 'Hey, I just did my first desk pop.']"
-            }
-        }
-    }
+    # query = {
+    #     "query": {
+    #         "match": {
+    #             "lines": "[0, 'Hey, I just did my first desk pop.']"
+    #         }
+    #     }
+    # }
+    #
+    # # Perform the search
+    # response = elastic.es.search(index=index_name, body=query)
 
-    # Perform the search
-    response = elastic.es.search(index=index_name, body=query)
-    for hit in response['hits']['hits']:
-        print(hit['_source'])
+    response = elastic.es.search(
+        index=index_name,
+        body={
+            "query": {
+                "match_all": {}
+            }
+        },
+        scroll='2m',  # keep the search context alive for 2 minutes
+        size=1000  # number of documents to return in each batch
+    )
+    print(f"RESPONSE:{response}")
