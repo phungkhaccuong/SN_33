@@ -35,7 +35,7 @@ def prepare_data(conversations):
 def index_data_if_not_exists(es, conversation):
     doc_id = conversation['guid']
     try:
-        lines = ",".join([f"[{line[0]}, '{line[1]}']" for line in conversation['lines']])
+        lines = ",".join([f"[{line[0]}, '{line[1]}']" for line in conversation['full_lines']])
         print(f"lines:{lines}")
         if not es.exists(index=index_name, id=doc_id):
             es.index(index=index_name, id=doc_id, body={
@@ -114,7 +114,7 @@ async def reserve_conversation(elastic):
         f"=================================================================START1111111 =============================================================")
     print(f"convo.line:{full_conversation.get('tags')}")
 
-    #index_data_if_not_exists(elastic.es, data[0])
+    index_data_if_not_exists(elastic.es, full_conversation)
 
 
 
