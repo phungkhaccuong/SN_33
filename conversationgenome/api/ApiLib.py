@@ -79,21 +79,18 @@ class ApiLib:
         jsonData = {}
         postData = None
         cert = None
-        selectedConvo = {}
         read_host_url = c.get('env', 'CGP_API_READ_HOST', 'http://api.conversations.xyz')
         read_host_port = c.get('env', 'CGP_API_READ_PORT', '443')
         http_timeout = Utils._float(c.get('env', 'HTTP_TIMEOUT', 60))
         url = f"{read_host_url}:{read_host_port}/api/v1/conversation/reserve"
         response = None
         try:
-            response = requests.post(url, headers=headers, json=jsonData, data=postData, cert=cert,
-                                     timeout=http_timeout)
+            response = requests.post(url, headers=headers, json=jsonData, data=postData, cert=cert,timeout=http_timeout)
         except requests.exceptions.Timeout as e:
             bt.logging.error(f"reserveConversation timeout error: {e}")
         maxLines = Utils._int(c.get('env', 'MAX_CONVO_LINES', 300))
         if response and response.status_code == 200:
             selectedConvo = response.json()
-            # print("selectedConvo", selectedConvo)
         else:
             bt.logging.error(f"reserveConversation error. Response: {response}")
             return None

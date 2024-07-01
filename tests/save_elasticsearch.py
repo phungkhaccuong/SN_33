@@ -1,14 +1,13 @@
+import asyncio
 import time
 
-from elasticsearch.helpers import bulk
+import bittensor as bt
 
 from conversationgenome.ConfigLib import c
 from conversationgenome.conversation.ConvoLib import ConvoLib
 from conversationgenome.llm.LlmLib import LlmLib
 from conversationgenome.search.structured_search_engine import StructuredSearchEngine
 from conversationgenome.utils.Utils import Utils
-import bittensor as bt
-import asyncio
 
 index_name = "conversations"
 
@@ -34,6 +33,7 @@ def prepare_data(conversations):
 
 def index_data_if_not_exists(es, conversation):
     doc_id = conversation['guid']
+    print(f"doc_id::::{doc_id}")
     try:
         lines = ",".join([f"[{line[0]}, '{line[1]}']" for line in conversation['full_lines']])
         print(f"lines:{lines}")
@@ -72,7 +72,6 @@ data = [
 ]
 
 
-
 def del_index(es):
     if es.indices.exists(index=index_name):
         # Delete the index
@@ -92,13 +91,13 @@ async def getConvo():
 
 async def reserve_conversation(elastic):
     full_conversation = await getConvo()
-    if full_conversation:
-        conversation_guid = str(Utils.get(full_conversation, "guid"))
-        num_lines = len(Utils.get(full_conversation, 'lines', []))
-        bt.logging.info(
-            f"Reserved conversation ID: {conversation_guid} with {num_lines} lines. Sending to {c.get('env', 'LLM_TYPE')} LLM...")
+    if full_conversation is None:
+        return
 
-    # Do overview tagging and generate base participant profiles
+    conversation_guid = str(Utils.get(full_conversation, "guid"))
+    num_lines = len(Utils.get(full_conversation, 'lines', []))
+    bt.logging.info(f"Reserved conversation ID: {conversation_guid} with {num_lines} lines. Sending to {c.get('env', 'LLM_TYPE')} LLM...")
+
     llml = LlmLib()
     result = await llml.conversation_to_metadata_v1(full_conversation)
     print(f"result:{result}")
@@ -112,31 +111,28 @@ async def reserve_conversation(elastic):
     full_conversation['tags'] = result['tags']
     print(
         f"=================================================================START1111111 =============================================================")
-    print(f"convo.line:{full_conversation.get('tags')}")
+    print(f"convo.tags:{full_conversation.get('tags')}")
 
     index_data_if_not_exists(elastic.es, full_conversation)
 
 
-
-
-
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
-    # Index the data
-    # while True:
-    #     asyncio.run(reserve_conversation(elastic))
-    #     time.sleep(10)
+
+    while True:
+        asyncio.run(reserve_conversation(elastic))
+        time.sleep(1000)
 
     # Define a search query for text field mapping
-    query = {
-        "query": {
-            "match": {
-                "lines": "[1, 'And welcome back.']"
-            }
-        }
-    }
-
-    # Perform the search
-    response = elastic.es.search(index=index_name, body=query)
-    print(f"RESPONSE:{response}")
-    # # Check if the index exists
+    # query = {
+    #     "query": {
+    #         "match": {
+    #             "lines": "[1, 'And welcome back.']"
+    #         }
+    #     }
+    # }
+    #
+    # # Perform the search
+    # response = elastic.es.search(index=index_name, body=query)
+    # print(f"RESPONSE:{response}")
+    # # # Check if the index exists
