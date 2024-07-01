@@ -75,10 +75,10 @@ async def index_conversation(elastic):
 
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
-    del_index(elastic.es)
+
     while True:
         asyncio.run(index_conversation(elastic))
-        time.sleep(1000)
+        time.sleep(1)
 
     # Define a search query for text field mapping
     # query = {
