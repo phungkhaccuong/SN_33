@@ -33,7 +33,6 @@ def prepare_data(conversations):
 
 def index_data_if_not_exists(es, conversation):
     doc_id = conversation['guid']
-    print(f"doc_id::::{doc_id}")
     try:
         lines = ",".join([f"[{line[0]}, '{line[1]}']" for line in conversation['full_lines']])
         print(f"lines:{lines}")
@@ -100,7 +99,6 @@ async def reserve_conversation(elastic):
 
     llml = LlmLib()
     result = await llml.conversation_to_metadata_v1(full_conversation)
-    print(f"result:{result}")
     if not result:
         bt.logging.error(f"ERROR:2873226353. No conversation metadata returned. Aborting.")
         return None
@@ -109,8 +107,6 @@ async def reserve_conversation(elastic):
         return None
 
     full_conversation['tags'] = result['tags']
-    print(
-        f"=================================================================START1111111 =============================================================")
     print(f"convo.tags:{full_conversation.get('tags')}")
 
     index_data_if_not_exists(elastic.es, full_conversation)
@@ -124,15 +120,15 @@ if __name__ == '__main__':
         time.sleep(1000)
 
     # Define a search query for text field mapping
-    # query = {
-    #     "query": {
-    #         "match": {
-    #             "lines": "[1, 'And welcome back.']"
-    #         }
-    #     }
-    # }
-    #
-    # # Perform the search
-    # response = elastic.es.search(index=index_name, body=query)
-    # print(f"RESPONSE:{response}")
-    # # # Check if the index exists
+    query = {
+        "query": {
+            "match": {
+                "lines": "[5, 'That s what you went for.']"
+            }
+        }
+    }
+
+    # Perform the search
+    response = elastic.es.search(index=index_name, body=query)
+    print(f"RESPONSE:{response}")
+    # # Check if the index exists
