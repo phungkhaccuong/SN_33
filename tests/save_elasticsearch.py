@@ -15,6 +15,7 @@ index_name = "conversations"
 def index_data_if_not_exists(es, conversation):
     doc_id = conversation['guid']
     print(f"[index_data_if_not_exists] guid {doc_id} and tags:{conversation['tags']}")
+    print(f"conversation:::{conversation['lines']}")
     try:
         lines = ",".join([f"[{line[0]}, '{line[1]}']" for line in conversation['full_lines']])
         if not es.exists(index=index_name, id=doc_id):
