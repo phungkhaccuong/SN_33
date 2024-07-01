@@ -115,9 +115,9 @@ async def reserve_conversation(elastic):
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
 
-    while True:
-        asyncio.run(reserve_conversation(elastic))
-        time.sleep(1000)
+    # while True:
+    #     asyncio.run(reserve_conversation(elastic))
+    #     time.sleep(1000)
 
     # Define a search query for text field mapping
     query = {
