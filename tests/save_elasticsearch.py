@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     while True:
         asyncio.run(index_conversation(elastic))
-        time.sleep(1)
+        time.sleep(2)
 
     # Define a search query for text field mapping
     # query = {
