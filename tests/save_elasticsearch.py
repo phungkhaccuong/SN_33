@@ -12,27 +12,9 @@ from conversationgenome.utils.Utils import Utils
 index_name = "conversations"
 
 
-def prepare_data(conversations):
-    actions = []
-    for conversation in conversations:
-        lines = " ".join([f"[{line[0]}, '{line[1]}']" for line in conversation['lines']])
-        print(f"lines:{lines}")
-        action = {
-            "_index": index_name,
-            "_id": conversation['guid'],
-            "_source": {
-                "guid": conversation['guid'],
-                "participants": conversation['participants'],
-                "lines": lines,
-                "tags": conversation.get('tags', None)  # Ensure 'tags' is included
-            }
-        }
-        actions.append(action)
-    return actions
-
-
 def index_data_if_not_exists(es, conversation):
     doc_id = conversation['guid']
+    print(f"[index_data_if_not_exists] guid {doc_id} and tags:{conversation['tags']}")
     try:
         lines = ",".join([f"[{line[0]}, '{line[1]}']" for line in conversation['full_lines']])
         print(f"lines:{lines}")
@@ -41,34 +23,13 @@ def index_data_if_not_exists(es, conversation):
                 "guid": conversation['guid'],
                 "participants": conversation['participants'],
                 "lines": lines,  # conversation['lines'],  # Lines as a text string
-                "tags": conversation.get('tags', None)  # Ensure 'tags' is included
+                "tags": conversation['tags']
             })
-            print(f"Document with guid {doc_id} indexed successfully.")
+            print(f"Document with guid {doc_id} and tags:{conversation['tags']} indexed successfully.")
         else:
-            print(f"Document with guid {doc_id} already exists. Skipping indexing.")
+            print(f"Document with guid {doc_id} and tags:{conversation['tags']} already exists. Skipping indexing.")
     except Exception as e:
         print(f"Error indexing document with guid {doc_id}: {e}")
-
-
-# Example data
-data = [
-    {'guid': 2029571757,
-     'participants': ['"SPEAKER_01"', '"SPEAKER_00"'],
-     'lines': [
-         [0, 'The following is a conversation with Chris Urmson.'],
-         [0,
-          'He was the CTO of the Google self-driving car team, a key engineer and leader behind the Carnegie Mellon University autonomous vehicle entries in the DARPA Grand Challenges and the winner of the DARPA Urban Challenge.'],
-         [0,
-          'Today, he s the CEO of Aurora Innovation, an autonomous vehicle software company he started with Sterling Anderson, who was the former director of Tesla Autopilot, and Drew Bagnell, Uber s former autonomy and perception lead.'],
-         [0,
-          'Chris is one of the top roboticists and autonomous vehicle experts in the world, and a longtime voice of reason in a space that is shrouded in both mystery and hype.'],
-         [0,
-          'He both acknowledges the incredible challenges involved in solving the problem of autonomous driving and is working hard to solve it.'],
-         [0, 'This is the Artificial Intelligence Podcast.']
-     ],
-     'tags': None
-     }
-]
 
 
 def del_index(es):
@@ -83,52 +44,52 @@ def del_index(es):
 async def getConvo():
     cl = ConvoLib()
     convo = await cl.get_conversation_v1(None)
-    print(f"=================================================================START =============================================================")
-    print(f"convo.line:{convo.get('lines')}")
     return convo
 
 
-async def reserve_conversation(elastic):
-    full_conversation = await getConvo()
-    if full_conversation is None:
-        return
+async def index_conversation(elastic):
+    try:
+        full_conversation = await getConvo()
+        if full_conversation is None:
+            return
 
-    conversation_guid = str(Utils.get(full_conversation, "guid"))
-    num_lines = len(Utils.get(full_conversation, 'lines', []))
-    bt.logging.info(f"Reserved conversation ID: {conversation_guid} with {num_lines} lines. Sending to {c.get('env', 'LLM_TYPE')} LLM...")
+        conversation_guid = str(Utils.get(full_conversation, "guid"))
+        num_lines = len(Utils.get(full_conversation, 'lines', []))
+        bt.logging.info(
+            f"Reserved conversation ID: {conversation_guid} with {num_lines} lines. Sending to {c.get('env', 'LLM_TYPE')} LLM...")
 
-    llml = LlmLib()
-    result = await llml.conversation_to_metadata_v1(full_conversation)
-    if not result:
-        bt.logging.error(f"ERROR:2873226353. No conversation metadata returned. Aborting.")
-        return None
-    if not Utils.get(result, 'success'):
-        bt.logging.error(f"ERROR:2873226354. Conversation metadata failed: {result}. Aborting.")
-        return None
+        llml = LlmLib()
+        result = await llml.conversation_to_metadata_v1(full_conversation)
+        if not result:
+            bt.logging.error(f"ERROR:2873226353. No conversation metadata returned. Aborting.")
+            return None
+        if not Utils.get(result, 'success'):
+            bt.logging.error(f"ERROR:2873226354. Conversation metadata failed: {result}. Aborting.")
+            return None
 
-    full_conversation['tags'] = result['tags']
-    print(f"convo.tags:{full_conversation.get('tags')}")
-
-    index_data_if_not_exists(elastic.es, full_conversation)
+        full_conversation['tags'] = result['tags']
+        index_data_if_not_exists(elastic.es, full_conversation)
+    except Exception as e:
+        bt.logging.error(f"[index_conversation] - ERROR::: {e}")
 
 
 if __name__ == '__main__':
     elastic = StructuredSearchEngine()
-
-    # while True:
-    #     asyncio.run(reserve_conversation(elastic))
-    #     time.sleep(1000)
+    del_index(elastic.es)
+    while True:
+        asyncio.run(index_conversation(elastic))
+        time.sleep(1000)
 
     # Define a search query for text field mapping
-    query = {
-        "query": {
-            "match": {
-                "lines": "[5, 'That s what you went for.']"
-            }
-        }
-    }
-
-    # Perform the search
-    response = elastic.es.search(index=index_name, body=query)
-    print(f"RESPONSE:{response}")
+    # query = {
+    #     "query": {
+    #         "match": {
+    #             "lines": "[5, 'That s what you went for.']"
+    #         }
+    #     }
+    # }
+    #
+    # # Perform the search
+    # response = elastic.es.search(index=index_name, body=query)
+    # print(f"RESPONSE:{response}")
     # # Check if the index exists
